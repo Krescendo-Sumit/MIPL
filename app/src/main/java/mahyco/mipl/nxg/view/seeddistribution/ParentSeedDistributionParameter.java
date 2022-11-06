@@ -4,11 +4,16 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.ArrayList;
 
+import mahyco.mipl.nxg.model.OldGrowerSeedDistributionModel;
+
 public class ParentSeedDistributionParameter {
     @SerializedName("createParentSeedDistributionModel")
-    ArrayList<DistributionParamItem> list = new ArrayList<>();
+    public ArrayList<OldGrowerSeedDistributionModel> list = new ArrayList<>();
 
-    class DistributionParamItem {
+    public ParentSeedDistributionParameter(ArrayList<OldGrowerSeedDistributionModel> list) {
+        this.list = list;
+    }
+/*class DistributionParamItem {
 
         @SerializedName("CountryId")
         int countryId;
@@ -28,7 +33,7 @@ public class ParentSeedDistributionParameter {
         @SerializedName("OrganizerId")
         int organizerId;
 
-        @SerializedName("ProductionCode")
+        @SerializedName("ParentSeedReceiptId")
         int productionCode;
 
         @SerializedName("CreatedBy")
@@ -46,7 +51,7 @@ public class ParentSeedDistributionParameter {
         @SerializedName("GrowerId")
         int growerId;
 
-        @SerializedName("SeedParentArea")
+        @SerializedName("SeedProductionArea")
         float seedParentArea;
-    }
+    }*/
 }

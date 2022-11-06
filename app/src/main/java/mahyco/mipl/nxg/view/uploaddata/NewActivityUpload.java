@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.StrictMode;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -34,6 +35,7 @@ import mahyco.mipl.nxg.view.growerregistration.GrowerRegistrationAPI;
 import mahyco.mipl.nxg.view.growerregistration.Listener;
 import mahyco.mipl.nxg.view.seeddistribution.DistributionListener;
 import mahyco.mipl.nxg.view.seeddistribution.OldGrowerSeedDistrAPI;
+import mahyco.mipl.nxg.view.seeddistribution.ParentSeedDistributionParameter;
 
 public class NewActivityUpload extends BaseActivity implements View.OnClickListener, Listener, DistributionListener {
 
@@ -188,19 +190,14 @@ public class NewActivityUpload extends BaseActivity implements View.OnClickListe
 
     @Override
     public void onSeedDistributionResult(SuccessModel result) {
-        /*if (result.getStatus().equalsIgnoreCase("Success")) {
-            Log.e("temporary", "result.getStatus().equalsIgnoreCase(\"Success\")");
+        if (result.getStatus().equalsIgnoreCase("Success")) {
             mResponseString = result.getComment();
             showNoInternetDialog(mContext, mResponseString);
-            new DeleteParentSeedDistributiSyncSuccessfully().execute();
-        }*/
-
-        if (mResponseString.contains("Error")) {
-            showNoInternetDialog(mContext, mResponseString);
-        } else {
             showNoInternetDialog(mContext, "New Parent Seed Distribution Record/s Uploaded Successfully");
+            new DeleteParentSeedDistributiSyncSuccessfully().execute();
+        } else {
+            showNoInternetDialog(mContext, result.getComment());
         }
-        new DeleteParentSeedDistributiSyncSuccessfully().execute();
     }
 
     @Override
@@ -745,6 +742,11 @@ public class NewActivityUpload extends BaseActivity implements View.OnClickListe
             old.setCreatedBy(mSeedDistributionList.get(i).getCreatedBy());
             list.add(old);
         }
+        ParentSeedDistributionParameter parentSeedDistributionParameter
+                = new ParentSeedDistributionParameter(list);
+
+        Log.e("temporary"," list "+parentSeedDistributionParameter.list);
+
         /*JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("CountryId", );
         jsonObject.addProperty("PlantingYear", mSeedDistributionList.get(0).getPlantingYear());
@@ -758,7 +760,7 @@ public class NewActivityUpload extends BaseActivity implements View.OnClickListe
         jsonObject.addProperty("IsDelete", false);
         jsonObject.addProperty("CreatedBy", "");*/
 
-        mOldGrowerSeedDistrAPI.createDistribution(/*jsonObject*/list);
+        mOldGrowerSeedDistrAPI.createDistribution(parentSeedDistributionParameter);
     }
 
     private class GetParentSeedDistrAsyncTaskList extends AsyncTask<Void, Void, Void> {
@@ -810,7 +812,7 @@ public class NewActivityUpload extends BaseActivity implements View.OnClickListe
         protected void onPostExecute(Boolean deleted) {
 //            Log.e("temporary", " onPostExecute deleted " + deleted);
             if (deleted) {
-
+                mSeedDistributionRecords.setText(getString(R.string.no_of_records_for_upload, 0));
             }
             /*new GetUpadteSeedDistrAfterDeleteAsyncTaskList().execute();*/
             super.onPostExecute(deleted);

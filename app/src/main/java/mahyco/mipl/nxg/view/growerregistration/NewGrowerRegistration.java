@@ -25,6 +25,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.AppCompatTextView;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -48,29 +49,23 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+import mahyco.mipl.nxg.BuildConfig;
 import mahyco.mipl.nxg.R;
 import mahyco.mipl.nxg.adapter.CategoryLoadingAdapter;
-import mahyco.mipl.nxg.adapter.Spinner10Adapter;
-import mahyco.mipl.nxg.adapter.Spinner1Adapter;
-import mahyco.mipl.nxg.adapter.Spinner2Adapter;
-import mahyco.mipl.nxg.adapter.Spinner3Adapter;
-import mahyco.mipl.nxg.adapter.Spinner4Adapter;
-import mahyco.mipl.nxg.adapter.Spinner5Adapter;
-import mahyco.mipl.nxg.adapter.Spinner6Adapter;
-import mahyco.mipl.nxg.adapter.Spinner7Adapter;
-import mahyco.mipl.nxg.adapter.Spinner8Adapter;
-import mahyco.mipl.nxg.adapter.Spinner9Adapter;
 import mahyco.mipl.nxg.model.CategoryChildModel;
 import mahyco.mipl.nxg.model.CategoryModel;
 import mahyco.mipl.nxg.model.GrowerModel;
 import mahyco.mipl.nxg.model.SuccessModel;
+import mahyco.mipl.nxg.spinner.CCFSerachSpinner;
 import mahyco.mipl.nxg.util.BaseActivity;
 import mahyco.mipl.nxg.util.Constants;
 import mahyco.mipl.nxg.util.MultipartUtility;
@@ -100,19 +95,19 @@ public class NewGrowerRegistration extends BaseActivity implements Listener, Vie
     GrowerModel growerModel = new GrowerModel();
     String counrtyId = "0", countryName = "";
 
-    private SearchableSpinner mSpinnerArray[];
+    private CCFSerachSpinner mSpinnerArray[];
     private int[] mSpinnerHeadingTextView;
 
-    private SearchableSpinner mSearchableSpinner1;
-    private SearchableSpinner mSearchableSpinner2;
-    private SearchableSpinner mSearchableSpinner3;
-    private SearchableSpinner mSearchableSpinner4;
-    private SearchableSpinner mSearchableSpinner5;
-    private SearchableSpinner mSearchableSpinner6;
-    private SearchableSpinner mSearchableSpinner7;
-    private SearchableSpinner mSearchableSpinner8;
-    private SearchableSpinner mSearchableSpinner9;
-    private SearchableSpinner mSearchableSpinner10;
+    private CCFSerachSpinner mSearchableSpinner1;
+    private CCFSerachSpinner mSearchableSpinner2;
+    private CCFSerachSpinner mSearchableSpinner3;
+    private CCFSerachSpinner mSearchableSpinner4;
+    private CCFSerachSpinner mSearchableSpinner5;
+    private CCFSerachSpinner mSearchableSpinner6;
+    private CCFSerachSpinner mSearchableSpinner7;
+    private CCFSerachSpinner mSearchableSpinner8;
+    private CCFSerachSpinner mSearchableSpinner9;
+    private CCFSerachSpinner mSearchableSpinner10;
 
     private DatePickerDialog mDatePickerDialog = null;
 
@@ -141,6 +136,8 @@ public class NewGrowerRegistration extends BaseActivity implements Listener, Vie
     private RadioButton mMaleRadioButton;
     private RadioButton mFemaleRadioButton;
 
+    private androidx.appcompat.widget.Toolbar toolbar;
+
     @Override
     protected int getLayout() {
         return R.layout.activity_new_grower_registration;
@@ -150,13 +147,37 @@ public class NewGrowerRegistration extends BaseActivity implements Listener, Vie
     @Override
     protected void init() {
         try {
+            AppCompatTextView mVersionTextView = findViewById(R.id.registration_version_code);
+            mVersionTextView.setText(getString(R.string.version_code, BuildConfig.VERSION_CODE));
 
             mContext = this;
             str_Lable = getIntent().getExtras().getString("title");
             counrtyId = Preferences.get(mContext, Preferences.COUNTRYCODE);
             countryName = Preferences.get(mContext, Preferences.COUNTRYNAME);
 
-            setTitle("New " + str_Lable + " Registration");
+            //setTitle("New " + str_Lable + " Registration");
+
+            toolbar = findViewById(R.id.toolbar);
+            if(str_Lable.equalsIgnoreCase("Grower")) {
+                toolbar.setTitle("New " + str_Lable + " Registration");
+            } else {
+                toolbar.setTitle("New Coordinator Registration");
+            }
+            setSupportActionBar(toolbar);
+
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (mCodeScannerView != null && mCodeScannerView.getVisibility() == View.VISIBLE) {
+                        mCodeScanner.releaseResources();
+                        hideScannerLayout();
+                    } else {
+                        finish();
+                    }
+                }
+            });
+
             dp_path = front_path = back_path = "";
 
             new GetCategoriesAsyncTask().execute();
@@ -191,7 +212,7 @@ public class NewGrowerRegistration extends BaseActivity implements Listener, Vie
                 }
             });
 
-            mSpinnerArray = new SearchableSpinner[]{mSearchableSpinner1, mSearchableSpinner2, mSearchableSpinner3, mSearchableSpinner4, mSearchableSpinner5, mSearchableSpinner6, mSearchableSpinner7, mSearchableSpinner8, mSearchableSpinner9, mSearchableSpinner10};
+            mSpinnerArray = new CCFSerachSpinner[]{mSearchableSpinner1, mSearchableSpinner2, mSearchableSpinner3, mSearchableSpinner4, mSearchableSpinner5, mSearchableSpinner6, mSearchableSpinner7, mSearchableSpinner8, mSearchableSpinner9, mSearchableSpinner10};
             mSpinnerHeadingTextView = new int[]{R.id.textview1, R.id.textview2, R.id.textview3, R.id.textview4, R.id.textview5, R.id.textview6, R.id.textview7, R.id.textview8, R.id.textview9, R.id.textview10};
 
             et_landmark = (EditText) findViewById(R.id.landmark_edittext);
@@ -206,7 +227,11 @@ public class NewGrowerRegistration extends BaseActivity implements Listener, Vie
             et_satffname = findViewById(R.id.staff_name_and_id_textview);
             txt_name = (TextView) findViewById(R.id.txt_name);
             txt_registration_country = (TextView) findViewById(R.id.registration_country_textview);
-            txt_name.setText(str_Lable + " Full Name :");
+            if(str_Lable.equalsIgnoreCase("Grower")) {
+                txt_name.setText(str_Lable + " Full Name :");
+            } else {
+                txt_name.setText("Coordinator Full Name :");
+            }
             txt_registration_country.setText("" + countryName);
             et_satffname.setText("" + Preferences.get(mContext, Preferences.USER_NAME));
             iv_dp = findViewById(R.id.farmer_photo);
@@ -239,6 +264,8 @@ public class NewGrowerRegistration extends BaseActivity implements Listener, Vie
         }
     }
 
+    String dob = "";
+
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
@@ -254,7 +281,11 @@ public class NewGrowerRegistration extends BaseActivity implements Listener, Vie
                     mCalendar.set(Calendar.MONTH, i1);
                     mCalendar.set(Calendar.DAY_OF_MONTH, i2);
 
-                    String myFormat = "yyyy-MM-dd";
+//                    String myFormat = "yyyy-MM-dd";
+                    String myFormat = "dd-MM-yyyy";
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault());
+                    dob = sdf.format(mCalendar.getTime());
+                  //  Log.e("temporary", "dob " + dob);
                     SimpleDateFormat dateFormat = new SimpleDateFormat(myFormat, Locale.getDefault());
                     et_dob.setText(dateFormat.format(mCalendar.getTime()));
                 };
@@ -297,7 +328,27 @@ public class NewGrowerRegistration extends BaseActivity implements Listener, Vie
                             if (results.length > 10 && results[1].contains("MWI")
                             ) {
                                 showToast("Scanner successfully !!");
-                                et_dob.setText(results[9]);
+
+                                try {
+                                    Date date1 = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).parse(results[9]);
+                                    if (date1 != null) {
+                                        dob = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault()).format(date1);
+                                    }
+                                } catch (ParseException e) {
+                                    e.printStackTrace();
+                                }
+
+                                try {
+                                    Date date2 = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).parse(results[9]);
+                                    if (date2 != null) {
+                                        et_dob.setText(new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(date2));
+                                    }
+                                } catch (ParseException e) {
+                                    e.printStackTrace();
+                                }
+
+//                                et_dob.setText(results[9]);
+
                                 // et_gender.setText(results[8]);
                                 if (results[8].equalsIgnoreCase("male")) {
                                     mFemaleRadioButton.setChecked(false);
@@ -344,54 +395,53 @@ public class NewGrowerRegistration extends BaseActivity implements Listener, Vie
     }
 
     public void submit(View v) {
-        if (validation()) {
-            try {
-
-                str_et_landmark = et_landmark.getText().toString();
-                str_et_fullname = et_fullname.getText().toString();
-
-                if (mMaleRadioButton.isChecked()) {
-                    str_et_gender = mMaleRadioButton.getText().toString();
-                } else {
-                    str_et_gender = mFemaleRadioButton.getText().toString();
-                }
-                str_et_dob = et_dob.getText().toString();
-                str_et_mobile = et_mobile.getText().toString();
-                str_et_uniqcode = et_uniqcode.getText().toString();
-                str_et_regdate = et_regdate.getText().toString();
-                str_et_satffname = et_satffname.getText().toString();
-
-
-                growerModel.setLoginId(Integer.parseInt(Preferences.get(mContext, Preferences.LOGINID).trim()));//,
-                growerModel.setCountryId(Integer.parseInt(counrtyId.trim()));//,
-                //village id
-                growerModel.setCountryMasterId(/*26*/mSpinner5List.get(mSearchableSpinner5.getSelectedItemPosition()).getCountryMasterId());//,
-                growerModel.setUniqueId("");//,
-                growerModel.setUserType(str_Lable);//,
-                growerModel.setLandMark(str_et_landmark);//,
-                growerModel.setFullName(str_et_fullname);//,
-                growerModel.setDOB(str_et_dob);//,
-                growerModel.setGender(str_et_gender);//,
-                growerModel.setMobileNo(str_et_mobile);//,
-                growerModel.setUniqueCode(str_et_uniqcode);//,
-                growerModel.setIdProofFrontCopy(front_path);//,
-                growerModel.setIdProofBackCopy(back_path);//,
-                growerModel.setUploadPhoto(dp_path);//,
-                growerModel.setRegDt(str_et_regdate);//,
-                growerModel.setIsSync(0);
-                growerModel.setGrowerImageUpload(0);
-                growerModel.setFrontImageUpload(0);
-                growerModel.setBackImageUpload(0);
-                growerModel.setStaffNameAndId(str_et_satffname);
-                growerModel.setCreatedBy(Preferences.get(mContext, Preferences.USER_NAME));//
-
-                new AddRegistrationAsyncTask().execute();
-//            stid = 1;
-//            new UploadFile().execute(dp_path);
-            } catch (Exception e) {
-                Log.e("temporary ", "Error is " + e.getMessage());
-            }
-        }
+        validation();
+//        if (validation()) {
+//            try {
+//
+//                str_et_landmark = et_landmark.getText().toString();
+//                str_et_fullname = et_fullname.getText().toString();
+//
+//                if (mMaleRadioButton.isChecked()) {
+//                    str_et_gender = mMaleRadioButton.getText().toString();
+//                } else {
+//                    str_et_gender = mFemaleRadioButton.getText().toString();
+//                }
+//                str_et_dob = et_dob.getText().toString();
+//                str_et_mobile = et_mobile.getText().toString();
+//                str_et_uniqcode = et_uniqcode.getText().toString();
+//                str_et_regdate = et_regdate.getText().toString();
+//                str_et_satffname = et_satffname.getText().toString();
+//
+//
+//                growerModel.setLoginId(Integer.parseInt(Preferences.get(mContext, Preferences.LOGINID).trim()));//,
+//                growerModel.setCountryId(Integer.parseInt(counrtyId.trim()));//,
+//                //village id
+//                growerModel.setCountryMasterId(/*26*/mSpinner5List.get(mSearchableSpinner5.getSelectedItemPosition()).getCountryMasterId());//,
+//                growerModel.setUniqueId("");//,
+//                growerModel.setUserType(str_Lable);//,
+//                growerModel.setLandMark(str_et_landmark);//,
+//                growerModel.setFullName(str_et_fullname);//,
+//                growerModel.setDOB(str_et_dob);//,
+//                growerModel.setGender(str_et_gender);//,
+//                growerModel.setMobileNo(str_et_mobile);//,
+//                growerModel.setUniqueCode(str_et_uniqcode);//,
+//                growerModel.setIdProofFrontCopy(front_path);//,
+//                growerModel.setIdProofBackCopy(back_path);//,
+//                growerModel.setUploadPhoto(dp_path);//,
+//                growerModel.setRegDt(str_et_regdate);//,
+//                growerModel.setIsSync(0);
+//                growerModel.setGrowerImageUpload(0);
+//                growerModel.setFrontImageUpload(0);
+//                growerModel.setBackImageUpload(0);
+//                growerModel.setStaffNameAndId(str_et_satffname);
+//                growerModel.setCreatedBy(Preferences.get(mContext, Preferences.USER_NAME));//
+//
+//                new AddRegistrationAsyncTask().execute();
+//            } catch (Exception e) {
+//                Log.e("temporary ", "Error is " + e.getMessage());
+//            }
+//        }
     }
 
     /*private class GetRegistrationAsyncTaskList extends AsyncTask<Void, Void, Void> {
@@ -455,7 +505,7 @@ public class NewGrowerRegistration extends BaseActivity implements Listener, Vie
             Dialog mDialog = null;
             AlertDialog.Builder alertDialog = new AlertDialog.Builder(mContext);
             alertDialog.setCancelable(false);
-            alertDialog.setTitle("MIPL");
+            alertDialog.setTitle("MSCOPE");
             alertDialog.setMessage("Registration data stored successfully");
             alertDialog.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                 @Override
@@ -853,13 +903,18 @@ public class NewGrowerRegistration extends BaseActivity implements Listener, Vie
         switch (mSpinnerPosition) {
             case 1: {
                 mSpinner1List = result;
-                Spinner1Adapter adapter = new Spinner1Adapter(mContext, R.layout.spinner_rows, result);
+//                Spinner1Adapter adapter = new Spinner1Adapter(mContext, R.layout.spinner_rows,
+//                        result);
+                ArrayAdapter<CategoryChildModel> adapter = new ArrayAdapter<>(mContext, R.layout.spinner_rows,
+                        result);
                 mSearchableSpinner1.setAdapter(adapter);
             }
             break;
             case 2: {
                 mSpinner2List = result;
-                Spinner2Adapter adapter = new Spinner2Adapter(mContext, R.layout.spinner_rows, result);
+                //Spinner2Adapter adapter = new Spinner2Adapter(mContext, R.layout.spinner_rows, result);
+                ArrayAdapter<CategoryChildModel> adapter = new ArrayAdapter<>(mContext, R.layout.spinner_rows,
+                        result);
                 mSearchableSpinner2.setAdapter(adapter);
                 mSearchableSpinner2.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                     @Override
@@ -880,7 +935,9 @@ public class NewGrowerRegistration extends BaseActivity implements Listener, Vie
             break;
             case 3: {
                 mSpinner3List = result;
-                Spinner3Adapter adapter = new Spinner3Adapter(mContext, R.layout.spinner_rows, result);
+                // Spinner3Adapter adapter = new Spinner3Adapter(mContext, R.layout.spinner_rows, result);
+                ArrayAdapter<CategoryChildModel> adapter = new ArrayAdapter<>(mContext, R.layout.spinner_rows,
+                        result);
                 mSearchableSpinner3.setAdapter(adapter);
 
                 mSearchableSpinner3.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -902,7 +959,9 @@ public class NewGrowerRegistration extends BaseActivity implements Listener, Vie
             break;
             case 4: {
                 mSpinner4List = result;
-                Spinner4Adapter adapter = new Spinner4Adapter(mContext, R.layout.spinner_rows, result);
+                //Spinner4Adapter adapter = new Spinner4Adapter(mContext, R.layout.spinner_rows, result);
+                ArrayAdapter<CategoryChildModel> adapter = new ArrayAdapter<>(mContext, R.layout.spinner_rows,
+                        result);
                 mSearchableSpinner4.setAdapter(adapter);
 
                 mSearchableSpinner4.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -924,7 +983,9 @@ public class NewGrowerRegistration extends BaseActivity implements Listener, Vie
             break;
             case 5: {
                 mSpinner5List = result;
-                Spinner5Adapter adapter = new Spinner5Adapter(mContext, R.layout.spinner_rows, result);
+                //Spinner5Adapter adapter = new Spinner5Adapter(mContext, R.layout.spinner_rows, result);
+                ArrayAdapter<CategoryChildModel> adapter = new ArrayAdapter<>(mContext, R.layout.spinner_rows,
+                        result);
                 mSearchableSpinner5.setAdapter(adapter);
 
                 mSearchableSpinner5.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -946,7 +1007,9 @@ public class NewGrowerRegistration extends BaseActivity implements Listener, Vie
             break;
             case 6: {
                 mSpinner6List = result;
-                Spinner6Adapter adapter = new Spinner6Adapter(mContext, R.layout.spinner_rows, result);
+                // Spinner6Adapter adapter = new Spinner6Adapter(mContext, R.layout.spinner_rows, result);
+                ArrayAdapter<CategoryChildModel> adapter = new ArrayAdapter<>(mContext, R.layout.spinner_rows,
+                        result);
                 mSearchableSpinner6.setAdapter(adapter);
 
                 mSearchableSpinner6.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -968,7 +1031,9 @@ public class NewGrowerRegistration extends BaseActivity implements Listener, Vie
             break;
             case 7: {
                 mSpinner7List = result;
-                Spinner7Adapter adapter = new Spinner7Adapter(mContext, R.layout.spinner_rows, result);
+                //Spinner7Adapter adapter = new Spinner7Adapter(mContext, R.layout.spinner_rows, result);
+                ArrayAdapter<CategoryChildModel> adapter = new ArrayAdapter<>(mContext, R.layout.spinner_rows,
+                        result);
                 mSearchableSpinner7.setAdapter(adapter);
 
                 mSearchableSpinner7.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -990,7 +1055,9 @@ public class NewGrowerRegistration extends BaseActivity implements Listener, Vie
             break;
             case 8: {
                 mSpinner8List = result;
-                Spinner8Adapter adapter = new Spinner8Adapter(mContext, R.layout.spinner_rows, result);
+                // Spinner8Adapter adapter = new Spinner8Adapter(mContext, R.layout.spinner_rows, result);
+                ArrayAdapter<CategoryChildModel> adapter = new ArrayAdapter<>(mContext, R.layout.spinner_rows,
+                        result);
                 mSearchableSpinner8.setAdapter(adapter);
 
                 mSearchableSpinner8.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -1012,7 +1079,9 @@ public class NewGrowerRegistration extends BaseActivity implements Listener, Vie
             break;
             case 9: {
                 mSpinner9List = result;
-                Spinner9Adapter adapter = new Spinner9Adapter(mContext, R.layout.spinner_rows, result);
+                // Spinner9Adapter adapter = new Spinner9Adapter(mContext, R.layout.spinner_rows, result);
+                ArrayAdapter<CategoryChildModel> adapter = new ArrayAdapter<>(mContext, R.layout.spinner_rows,
+                        result);
                 mSearchableSpinner9.setAdapter(adapter);
 
                 mSearchableSpinner9.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -1034,7 +1103,9 @@ public class NewGrowerRegistration extends BaseActivity implements Listener, Vie
             break;
             case 10: {
                 mSpinner10List = result;
-                Spinner10Adapter adapter = new Spinner10Adapter(mContext, R.layout.spinner_rows, result);
+                // Spinner10Adapter adapter = new Spinner10Adapter(mContext, R.layout.spinner_rows, result);
+                ArrayAdapter<CategoryChildModel> adapter = new ArrayAdapter<>(mContext, R.layout.spinner_rows,
+                        result);
                 mSearchableSpinner10.setAdapter(adapter);
                 mSearchableSpinner10.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                     @Override
@@ -1274,7 +1345,7 @@ public class NewGrowerRegistration extends BaseActivity implements Listener, Vie
         }
     }
 
-    private boolean validation() {
+    /*private boolean validation() {
         if (mGrowerPhotoFile == null) {
             showToast(getString(R.string.please_grower_photo));
             return false;
@@ -1291,7 +1362,7 @@ public class NewGrowerRegistration extends BaseActivity implements Listener, Vie
                 showToast(getString(R.string.Please_enter_organizer_name));
             }
             return false;
-        } else if (/*TextUtils.isEmpty(et_gender.getText().toString())*/
+        } else if (*//*TextUtils.isEmpty(et_gender.getText().toString())*//*
                 !mMaleRadioButton.isChecked() && !mFemaleRadioButton.isChecked()) {
             showToast(getString(R.string.Please_select_gender));
             return false;
@@ -1311,13 +1382,219 @@ public class NewGrowerRegistration extends BaseActivity implements Listener, Vie
             showToast(getString(R.string.Please_enter_unique_code));
             return false;
         } else {
-            /*return if (checkInternetConnection()) {*/
+            *//*return if (checkInternetConnection()) {*//*
             return true;
-            /*} else {
+            *//*} else {
                 setEnableOrDisable(true)
                 showToast(getString(R.string.err_internet))
                 false
-            }*/
+            }*//*
+        }
+    }*/
+    private /*boolean*/void validation() {
+        if (mGrowerPhotoFile == null) {
+            showToast(getString(R.string.please_grower_photo));
+            //  return false;
+        } else if (mSearchableSpinner5.getSelectedItemPosition() == -1) {
+            showToast("Data not found");
+            // return false;
+        } else if (TextUtils.isEmpty(et_landmark.getText().toString())) {
+            showToast(getString(R.string.Please_enter_landmark));
+            // return false;
+        } else if (TextUtils.isEmpty(et_fullname.getText().toString())) {
+            if (str_Lable.equalsIgnoreCase("Grower")) {
+                showToast(getString(R.string.Please_enter_farmer_name));
+            } else {
+                showToast(getString(R.string.Please_enter_organizer_name));
+            }
+            //  return false;
+        } else if (/*TextUtils.isEmpty(et_gender.getText().toString())*/
+                !mMaleRadioButton.isChecked() && !mFemaleRadioButton.isChecked()) {
+            showToast(getString(R.string.Please_select_gender));
+            // return false;
+        } else if (TextUtils.isEmpty(et_dob.getText().toString().trim())) {
+            showToast(getString(R.string.Please_enter_date_of_birth));
+            //  return false;
+        } else if (TextUtils.isEmpty(et_mobile.getText().toString().trim())) {
+            showToast(getString(R.string.Please_enter_mobile_no));
+            //  return false;
+        } else if (mDocFrontPhotoFile == null) {
+            showToast(getString(R.string.please_capture_national_id_photo_front));
+            // return false;
+        } else if (mDocBackPhotoFile == null) {
+            showToast(getString(R.string.please_capture_national_id_photo_back));
+            // return false;
+        } else if (TextUtils.isEmpty(et_uniqcode.getText().toString().trim())) {
+            showToast(getString(R.string.Please_enter_unique_code));
+            // return false;
+        } /*else if (new SqlightDatabase(mContext).isGrowerRegister(et_uniqcode.getText().toString().trim())) {
+            Dialog mDialog = null;
+            AlertDialog.Builder alertDialog = new AlertDialog.Builder(mContext);
+            alertDialog.setCancelable(false);
+            alertDialog.setTitle("MIPL");
+            alertDialog.setMessage("Record Already Exists.");
+            alertDialog.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    // finish();
+                    dialogInterface.dismiss();
+                }
+            });
+            mDialog = alertDialog.create();
+            mDialog.show();
+            return false;
+        } else if (new SqlightDatabase(mContext).isGrowerDownloaded(et_uniqcode.getText().toString().trim())) {
+            Dialog mDialog = null;
+            AlertDialog.Builder alertDialog = new AlertDialog.Builder(mContext);
+            alertDialog.setCancelable(false);
+            alertDialog.setTitle("MIPL");
+            alertDialog.setMessage("Record Already Exists.");
+            alertDialog.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    // finish();
+                    dialogInterface.dismiss();
+                }
+            });
+            mDialog = alertDialog.create();
+            mDialog.show();
+            return false;
+        } */ else {
+            // Log.e("temporary", " validation true");
+            new CheckWithLocalRegistrationAsyncTask().execute();
+            /*return if (checkInternetConnection()) {*/
+            //  return true;
+        /*} else {
+            setEnableOrDisable(true)
+            showToast(getString(R.string.err_internet))
+            false
+        }*/
+        }
+    }
+
+    private class CheckWithLocalRegistrationAsyncTask extends AsyncTask<Void, Void, Boolean> {
+        @Override
+        protected final Boolean doInBackground(Void... voids) {
+            SqlightDatabase database = null;
+            boolean b = false;
+            try {
+                database = new SqlightDatabase(mContext);
+                b = database.isGrowerRegister(et_uniqcode.getText().toString().trim());
+            } finally {
+                if (database != null) {
+                    database.close();
+                }
+            }
+            return b;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean unused) {
+            if (unused) {
+                Dialog mDialog = null;
+                AlertDialog.Builder alertDialog = new AlertDialog.Builder(mContext);
+                alertDialog.setCancelable(false);
+                alertDialog.setTitle("MSCOPE");
+                alertDialog.setMessage("Record Already Exists.");
+                alertDialog.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        // finish();
+                        dialogInterface.dismiss();
+                    }
+                });
+                mDialog = alertDialog.create();
+                mDialog.show();
+            } else {
+                new CheckWithServerRegistrationAsyncTask().execute();
+            }
+            super.onPostExecute(unused);
+        }
+    }
+
+    private class CheckWithServerRegistrationAsyncTask extends AsyncTask<Void, Void, Boolean> {
+        @Override
+        protected final Boolean doInBackground(Void... voids) {
+            SqlightDatabase database = null;
+            boolean b = false;
+            try {
+                database = new SqlightDatabase(mContext);
+                b = database.isGrowerDownloaded(et_uniqcode.getText().toString().trim());
+            } finally {
+                if (database != null) {
+                    database.close();
+                }
+            }
+            return b;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean unused) {
+            if (unused) {
+                Dialog mDialog = null;
+                AlertDialog.Builder alertDialog = new AlertDialog.Builder(mContext);
+                alertDialog.setCancelable(false);
+                alertDialog.setTitle("MSCOPE");
+                alertDialog.setMessage("Record Already Exists.");
+                alertDialog.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.dismiss();
+                    }
+                });
+                mDialog = alertDialog.create();
+                mDialog.show();
+            } else {
+                saveData();
+            }
+            super.onPostExecute(unused);
+        }
+    }
+
+    private void saveData() {
+        try {
+            str_et_landmark = et_landmark.getText().toString();
+            str_et_fullname = et_fullname.getText().toString();
+
+            if (mMaleRadioButton.isChecked()) {
+                str_et_gender = mMaleRadioButton.getText().toString();
+            } else {
+                str_et_gender = mFemaleRadioButton.getText().toString();
+            }
+            str_et_dob = /*et_dob.getText().toString();*/dob;
+            str_et_mobile = et_mobile.getText().toString();
+            str_et_uniqcode = et_uniqcode.getText().toString();
+            str_et_regdate = et_regdate.getText().toString();
+            str_et_satffname = et_satffname.getText().toString();
+
+//            Log.e("temporary", "current date " + getCurrentDateToStoreInDb()
+//            +" dob "+ dob);
+            growerModel.setLoginId(Integer.parseInt(Preferences.get(mContext, Preferences.LOGINID).trim()));//,
+            growerModel.setCountryId(Integer.parseInt(counrtyId.trim()));//,
+            //village id
+            growerModel.setCountryMasterId(/*26*/mSpinner5List.get(mSearchableSpinner5.getSelectedItemPosition()).getCountryMasterId());//,
+            growerModel.setUniqueId("");//,
+            growerModel.setUserType(str_Lable);//,
+            growerModel.setLandMark(str_et_landmark);//,
+            growerModel.setFullName(str_et_fullname);//,
+            growerModel.setDOB(dob/*getDateToSendServer(mBirthDateToSendServer)*/);//,
+            growerModel.setGender(str_et_gender);//,
+            growerModel.setMobileNo(str_et_mobile);//,
+            growerModel.setUniqueCode(str_et_uniqcode);//,
+            growerModel.setIdProofFrontCopy(front_path);//,
+            growerModel.setIdProofBackCopy(back_path);//,
+            growerModel.setUploadPhoto(dp_path);//,
+            growerModel.setRegDt(getCurrentDateToStoreInDb()/*getCurrentDateToSendServer()*/);//,
+            growerModel.setIsSync(0);
+            growerModel.setGrowerImageUpload(0);
+            growerModel.setFrontImageUpload(0);
+            growerModel.setBackImageUpload(0);
+            growerModel.setStaffNameAndId(str_et_satffname);
+            growerModel.setCreatedBy(Preferences.get(mContext, Preferences.USER_NAME));//
+
+            new AddRegistrationAsyncTask().execute();
+        } catch (Exception e) {
+            Log.e("temporary ", "Error is " + e.getMessage());
         }
     }
 

@@ -14,12 +14,14 @@ import android.os.Environment;
 import android.provider.Settings;
 import android.view.Gravity;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,6 +29,8 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+
+import mahyco.mipl.nxg.R;
 
 public abstract class BaseActivity extends AppCompatActivity {
 
@@ -36,7 +40,9 @@ public abstract class BaseActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+        getWindow().setStatusBarColor(ContextCompat.getColor(this, R.color.colorPrimary));
         setContentView(getLayout());
         init();
     }
@@ -46,7 +52,17 @@ public abstract class BaseActivity extends AppCompatActivity {
     protected abstract void init();
 
     protected boolean checkInternetConnection(Context context) {
-        boolean result = false;
+        try {
+            ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo activeInfo = connMgr.getActiveNetworkInfo();
+            if (activeInfo != null && activeInfo.isConnected()) {
+                return (activeInfo.getType() == ConnectivityManager.TYPE_WIFI || activeInfo.getType() == ConnectivityManager.TYPE_MOBILE);
+            }
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
+        return false;
+        /*boolean result = false;
         try {
             ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -69,14 +85,14 @@ public abstract class BaseActivity extends AppCompatActivity {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return result;
+        return result;*/
     }
 
     protected void showNoInternetDialog(Context context, String message) {
         mDialog = null;
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(context);
         alertDialog.setCancelable(false);
-        alertDialog.setTitle("MIPL");
+        alertDialog.setTitle("MSCOPE");
         alertDialog.setMessage(message);
         alertDialog.setPositiveButton("Ok", (dialogInterface, i) -> dialogInterface.dismiss());
         mDialog = alertDialog.create();
@@ -91,11 +107,19 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     protected String getCurrentDate() {
         Date date = Calendar.getInstance().getTime();
-        String myFormat = "yyyy-MM-dd";
+//        String myFormat = "yyyy-MM-dd";
+        String myFormat = "dd-MM-yyyy";
 
         SimpleDateFormat df = new SimpleDateFormat(myFormat, Locale.getDefault());
         return df.format(date);
     }
+
+    protected String getCurrentDateToStoreInDb() {
+        Date date = Calendar.getInstance().getTime();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault());
+        return sdf.format(date);
+    }
+
 
     protected boolean checkAutoTimeEnabledOrNot() {
         return Settings.Global.getInt(getContentResolver(), Settings.Global.AUTO_TIME, 0) == 1;
@@ -105,7 +129,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         mDialog = null;
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(context);
         alertDialog.setCancelable(false);
-        alertDialog.setTitle("MIPL");
+        alertDialog.setTitle("MSCOPE");
         alertDialog.setMessage(message);
         alertDialog.setPositiveButton("Settings", (dialogInterface, i) -> startActivity(new Intent(Settings.ACTION_DATE_SETTINGS)));
         mDialog = alertDialog.create();

@@ -24,20 +24,35 @@ import java.util.List;
 import mahyco.mipl.nxg.BuildConfig;
 import mahyco.mipl.nxg.R;
 import mahyco.mipl.nxg.model.CategoryChildModel;
+import mahyco.mipl.nxg.model.CategoryModel;
+import mahyco.mipl.nxg.model.CropModel;
+import mahyco.mipl.nxg.model.CropTypeModel;
+import mahyco.mipl.nxg.model.DownloadGrowerModel;
+import mahyco.mipl.nxg.model.GetAllSeedDistributionModel;
 import mahyco.mipl.nxg.model.GrowerModel;
 import mahyco.mipl.nxg.model.OldGrowerSeedDistributionModel;
+import mahyco.mipl.nxg.model.ProductCodeModel;
+import mahyco.mipl.nxg.model.ProductionClusterModel;
+import mahyco.mipl.nxg.model.SeasonModel;
+import mahyco.mipl.nxg.model.SeedBatchNoModel;
+import mahyco.mipl.nxg.model.SeedReceiptModel;
+import mahyco.mipl.nxg.model.StoreAreaModel;
 import mahyco.mipl.nxg.model.SuccessModel;
 import mahyco.mipl.nxg.util.BaseActivity;
 import mahyco.mipl.nxg.util.Constants;
 import mahyco.mipl.nxg.util.MultipartUtility;
+import mahyco.mipl.nxg.util.Preferences;
 import mahyco.mipl.nxg.util.SqlightDatabase;
+import mahyco.mipl.nxg.view.downloadcategories.DownloadCategoryApi;
+import mahyco.mipl.nxg.view.downloadcategories.DownloadCategoryListListener;
 import mahyco.mipl.nxg.view.growerregistration.GrowerRegistrationAPI;
 import mahyco.mipl.nxg.view.growerregistration.Listener;
 import mahyco.mipl.nxg.view.seeddistribution.DistributionListener;
 import mahyco.mipl.nxg.view.seeddistribution.OldGrowerSeedDistrAPI;
 import mahyco.mipl.nxg.view.seeddistribution.ParentSeedDistributionParameter;
 
-public class NewActivityUpload extends BaseActivity implements View.OnClickListener, Listener, DistributionListener {
+public class NewActivityUpload extends BaseActivity implements View.OnClickListener, Listener, DistributionListener,
+        DownloadCategoryListListener {
 
     private AppCompatButton mGrowerRegistrationBtn;
     private AppCompatButton mOrganizerRegistrationBtn;
@@ -62,6 +77,8 @@ public class NewActivityUpload extends BaseActivity implements View.OnClickListe
     private int mGrowerListSize;
     private int mOrganizerSize;
 
+    private androidx.appcompat.widget.Toolbar toolbar;
+
     @Override
     protected int getLayout() {
         return R.layout.activity_upload_layout;
@@ -70,7 +87,19 @@ public class NewActivityUpload extends BaseActivity implements View.OnClickListe
     @Override
     protected void init() {
 
-        setTitle("Data Upload");
+        // setTitle("Data Upload");
+
+        toolbar = findViewById(R.id.toolbar);
+        toolbar.setTitle("Data Upload");
+        setSupportActionBar(toolbar);
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
+            }
+        });
 
         mContext = this;
 
@@ -99,6 +128,8 @@ public class NewActivityUpload extends BaseActivity implements View.OnClickListe
         mGrowerList = new ArrayList<>();
         mOrganizerList = new ArrayList<>();
         mSeedDistributionList = new ArrayList<>();
+
+        mDownloadCategoryApi = new DownloadCategoryApi(mContext, this);
 
         new GetRegistrationAsyncTaskList().execute();
         new GetParentSeedDistrAsyncTaskList().execute();
@@ -220,7 +251,10 @@ public class NewActivityUpload extends BaseActivity implements View.OnClickListe
             /*if (mGrowerClicked) {*/
 //            Log.e("temporary", "result.getStatus().equalsIgnoreCase(\"Success\")");
             mResponseString = result.getComment();
+          //  Log.e("temporary","onGrowerRegister mResponseString " + mResponseString);
             new DeleteIfSyncSuccessfully().execute();
+        } else {
+            showNoInternetDialog(mContext, result.getComment());
         }
     }
 
@@ -533,6 +567,7 @@ public class NewActivityUpload extends BaseActivity implements View.OnClickListe
                     stid = 1;
                     new UploadFile().execute(mGrowerList.get(0).getUploadPhoto());
                 } else {
+                  //  Log.e("temporary","mResponseString " + mResponseString);
                     if (mResponseString.contains("Error")) {
                         showNoInternetDialog(mContext, mResponseString);
                     } else {
@@ -552,7 +587,7 @@ public class NewActivityUpload extends BaseActivity implements View.OnClickListe
                     if (mResponseString.contains("Error")) {
                         showNoInternetDialog(mContext, mResponseString);
                     } else {
-                        showNoInternetDialog(mContext, "New Organizer Registration " + mOrganizerSize + "  Record/s Uploaded Successfully");
+                        showNoInternetDialog(mContext, "New Coordinator Registration " + mOrganizerSize + "  Record/s Uploaded Successfully");
                     }//                    Log.e("temporary", "onGrowerRegister mGrowerUpload all data upload");
                 }
                 mOrganizerRecords.setText(getString(R.string.no_of_records_for_upload, mOrganizerList.size()));
@@ -683,7 +718,7 @@ public class NewActivityUpload extends BaseActivity implements View.OnClickListe
         if (mGrowerClicked) {
             jsonObject.addProperty("CountryId", mGrowerList.get(0).getCountryId());
             jsonObject.addProperty("CountryMasterId", mGrowerList.get(0).getCountryMasterId());
-            jsonObject.addProperty("CreatedBy", mGrowerList.get(0).getCreatedBy());
+            jsonObject.addProperty("CreatedBy",/* mGrowerList.get(0).getCreatedBy()*/Preferences.get(mContext, Preferences.USER_ID));
             jsonObject.addProperty("DOB", mGrowerList.get(0).getDOB());
             jsonObject.addProperty("FullName", mGrowerList.get(0).getFullName());
             jsonObject.addProperty("Gender", mGrowerList.get(0).getGender());
@@ -701,7 +736,7 @@ public class NewActivityUpload extends BaseActivity implements View.OnClickListe
         } else {
             jsonObject.addProperty("CountryId", mOrganizerList.get(0).getCountryId());
             jsonObject.addProperty("CountryMasterId", mOrganizerList.get(0).getCountryMasterId());
-            jsonObject.addProperty("CreatedBy", mOrganizerList.get(0).getCreatedBy());
+            jsonObject.addProperty("CreatedBy", /*mOrganizerList.get(0).getCreatedBy()*/Preferences.get(mContext, Preferences.USER_ID));
             jsonObject.addProperty("DOB", mOrganizerList.get(0).getDOB());
             jsonObject.addProperty("FullName", mOrganizerList.get(0).getFullName());
             jsonObject.addProperty("Gender", mOrganizerList.get(0).getGender());
@@ -717,6 +752,7 @@ public class NewActivityUpload extends BaseActivity implements View.OnClickListe
             jsonObject.addProperty("UserType", mOrganizerList.get(0).getUserType());
             jsonObject.addProperty("UniqueId", mOrganizerList.get(0).getUniqueId());
         }
+      //  Log.e("temporary"," jsonobject "+jsonObject);
         registrationAPI.createGrower(jsonObject);
     }
 
@@ -744,7 +780,7 @@ public class NewActivityUpload extends BaseActivity implements View.OnClickListe
         ParentSeedDistributionParameter parentSeedDistributionParameter
                 = new ParentSeedDistributionParameter(list);
 
-       // Log.e("temporary"," list "+parentSeedDistributionParameter.list);
+        // Log.e("temporary"," list "+parentSeedDistributionParameter.list);
 
         /*JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("CountryId", );
@@ -809,11 +845,14 @@ public class NewActivityUpload extends BaseActivity implements View.OnClickListe
 
         @Override
         protected void onPostExecute(Boolean deleted) {
-//            Log.e("temporary", " onPostExecute deleted " + deleted);
             if (deleted) {
+                Preferences.saveBool(mContext,Preferences.UPLOAD_DISTRIBUTION_DATA_AVAILABLE,false);
+                if (mSeedDistributionList != null && mSeedDistributionList.size() > 0) {
+                    mSeedDistributionList.clear();
+                }
                 mSeedDistributionRecords.setText(getString(R.string.no_of_records_for_upload, 0));
             }
-            /*new GetUpadteSeedDistrAfterDeleteAsyncTaskList().execute();*/
+            new DeleteAreaDataAsyncTaskList().execute();
             super.onPostExecute(deleted);
         }
     }
@@ -843,4 +882,245 @@ public class NewActivityUpload extends BaseActivity implements View.OnClickListe
             super.onPostExecute(unused);
         }
     }*/
+
+    private class DeleteAreaDataAsyncTaskList extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected final Void doInBackground(Void... voids) {
+            SqlightDatabase database = null;
+            try {
+                database = new SqlightDatabase(mContext);
+                boolean b = database.deleteAreaData();
+              //  Log.e("temporary","area database deleted " + b);
+            } finally {
+                if (database != null) {
+                    database.close();
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void unused) {
+            downloadAllSeedDistributionMasterData();
+            super.onPostExecute(unused);
+        }
+    }
+
+    private JsonObject mJsonObjectCategory;
+    private DownloadCategoryApi mDownloadCategoryApi;
+    private List<GetAllSeedDistributionModel> mGetAllSeedDistributionList;
+    private List<SeedReceiptModel> mParentSeedReceiptList;
+    private List<SeedBatchNoModel> mSeedBatchNoList;
+    private String mDatabaseName = "";
+
+    final String SEED_BATCH_NO_MASTER_DATABASE = "SeedBatchNoMaster";
+    final String PARENT_SEED_RECEIPT_MASTER_DATABASE = "ParentSeedReceiptMaster";
+    final String GET_ALL_SEED_DISTRIBUTION_MASTER_DATABASE = "GetAllSeedDistributionMaster";
+
+    @Override
+    public void onListCategoryMasterResponse(List<CategoryModel> result) {
+    }
+
+    @Override
+    public void onListLocationResponse(List<CategoryChildModel> result) {
+    }
+
+    @Override
+    public void onListSeasonMasterResponse(List<SeasonModel> result) {
+    }
+
+    @Override
+    public void onListGrowerResponse(List<DownloadGrowerModel> result) {
+    }
+
+    @Override
+    public void onListCropResponse(List<CropModel> result) {
+    }
+
+    @Override
+    public void onListProductionClusterResponse(List<ProductionClusterModel> result) {
+    }
+
+    @Override
+    public void onListProductCodeResponse(List<ProductCodeModel> result) {
+    }
+
+    @Override
+    public void onListCropTypeResponse(List<CropTypeModel> result) {
+    }
+
+    @Override
+    public void onListAllSeedDistributionResponse(List<GetAllSeedDistributionModel> result) {
+        if (mGetAllSeedDistributionList != null) {
+            mGetAllSeedDistributionList.clear();
+        }
+       // Log.e("temporary","All Seed Distribution List result " + result);
+        mDatabaseName = "GetAllSeedDistributionMaster";
+        mGetAllSeedDistributionList = result;
+        new MasterAsyncTask().execute();
+    }
+
+    @Override
+    public void onListSeedReceiptNoResponse(List<SeedReceiptModel> lst) {
+        if (mParentSeedReceiptList != null) {
+            mParentSeedReceiptList.clear();
+        }
+      //  Log.e("temporary","Seed Receipt List Response lst " + lst);
+        mParentSeedReceiptList = lst;
+        mDatabaseName = "ParentSeedReceiptMaster";
+        new MasterAsyncTask().execute();
+    }
+
+    @Override
+    public void onListSeedBatchNoResponse(List<SeedBatchNoModel> lst) {
+        if (mSeedBatchNoList != null) {
+            mSeedBatchNoList.clear();
+        }
+      //  Log.e("temporary","Seed Batch  List Response lst " + lst);
+        mSeedBatchNoList = lst;
+        mDatabaseName = "SeedBatchNoMaster";
+        new MasterAsyncTask().execute();
+    }
+
+    private void downloadParentSeedReceiptMasterData() {
+        try {
+            mJsonObjectCategory = null;
+            mJsonObjectCategory = new JsonObject();
+            mJsonObjectCategory.addProperty("filterValue", Preferences.get(mContext, Preferences.COUNTRYCODE));
+            mJsonObjectCategory.addProperty("FilterOption", "CountryId");
+            mDownloadCategoryApi.getSeedReceiptNo(mJsonObjectCategory);
+        } catch (Exception e) {
+        }
+    }
+
+    private void downloadSeedBatchNoMasterData() {
+        try {
+            mJsonObjectCategory = null;
+            mJsonObjectCategory = new JsonObject();
+            mJsonObjectCategory.addProperty("filterValue", Preferences.get(mContext, Preferences.COUNTRYCODE));
+            mJsonObjectCategory.addProperty("FilterOption", "CountryId");
+            mDownloadCategoryApi.getSeedBatchNo(mJsonObjectCategory);
+        } catch (Exception e) {
+        }
+    }
+
+    private void downloadAllSeedDistributionMasterData() {
+        try {
+            mJsonObjectCategory = null;
+            mJsonObjectCategory = new JsonObject();
+            mJsonObjectCategory.addProperty("filterValue", Preferences.get(mContext, Preferences.COUNTRYCODE));
+            mJsonObjectCategory.addProperty("FilterOption", "CountryId");
+            mDownloadCategoryApi.getAllSeedDistributionList(mJsonObjectCategory);
+        } catch (Exception e) {
+        }
+    }
+
+    private class MasterAsyncTask extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected final Void doInBackground(Void... voids) {
+            SqlightDatabase database = null;
+            try {
+                database = new SqlightDatabase(mContext);
+                switch (mDatabaseName) {
+                    case SEED_BATCH_NO_MASTER_DATABASE:
+                        database = new SqlightDatabase(mContext);
+                        database.trucateTable("tbl_seedbatchnomaster");
+                        for (SeedBatchNoModel param : mSeedBatchNoList) {
+                            database.addSeedBatchNo(param);
+                        }
+                    break;
+                    case PARENT_SEED_RECEIPT_MASTER_DATABASE:
+                        database = new SqlightDatabase(mContext);
+                        database.trucateTable("tbl_seedreciptmaster");
+                        for (SeedReceiptModel param : mParentSeedReceiptList) {
+                            database.addSeedReceipt(param);
+                        }
+                        break;
+                    case GET_ALL_SEED_DISTRIBUTION_MASTER_DATABASE:
+                        database = new SqlightDatabase(mContext);
+                        database.trucateTable("tbl_allseeddistributionmaster");
+                        Preferences.save(mContext, Preferences.DISTRIBUTION_LIST_DOWNLOAD, "");
+                       // Log.e("temporary","before size " + mGetAllSeedDistributionList.size());
+
+                        for (GetAllSeedDistributionModel param : mGetAllSeedDistributionList) {
+                            database.addAllSeedDistributionList(param);
+                        }
+
+                        if (mGetAllSeedDistributionList.size() > 0) {
+                            Preferences.save(mContext, Preferences.DISTRIBUTION_LIST_DOWNLOAD, "Yes");
+                        }
+
+//                        Log.e("temporary","after is download " +
+//                                Preferences.get(mContext, Preferences.DISTRIBUTION_LIST_DOWNLOAD)+
+//                                " mGetAllSeedDistributionList.size() "+ mGetAllSeedDistributionList.size());
+                        break;
+                }
+            } finally {
+                switch (mDatabaseName) {
+                    case SEED_BATCH_NO_MASTER_DATABASE:
+                        mSeedBatchNoList.clear();
+                        break;
+                    case PARENT_SEED_RECEIPT_MASTER_DATABASE:
+                        mParentSeedReceiptList.clear();
+                        break;
+                   /* case GET_ALL_SEED_DISTRIBUTION_MASTER_DATABASE:
+                        mGetAllSeedDistributionList.clear();
+                        break;*/
+                }
+                if (database != null) {
+                    database.close();
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void voids) {
+            switch (mDatabaseName) {
+                case SEED_BATCH_NO_MASTER_DATABASE:
+                    downloadParentSeedReceiptMasterData();
+                    break;
+                case GET_ALL_SEED_DISTRIBUTION_MASTER_DATABASE:
+                    // downloadSeedBatchNoMasterData();
+                  //  Log.e("temporary","");
+                    new StoreDataAsyncTask().execute();
+                    break;
+            }
+            super.onPostExecute(voids);
+        }
+    }
+
+    private class StoreDataAsyncTask extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected final Void doInBackground(Void... voids) {
+            try {
+                SqlightDatabase database = new SqlightDatabase(mContext);
+                database.trucateTable("tbl_storestributiondata");
+              //  Log.e("temporary","doInBackground mGetAllSeedDistributionList "+ mGetAllSeedDistributionList.size());
+                for (int i = 0; i < mGetAllSeedDistributionList.size(); i++) {
+                    StoreAreaModel storeAreaModel = new StoreAreaModel(mGetAllSeedDistributionList.get(i).getPlantingYear(), mGetAllSeedDistributionList.get(i).getProductionCode(),
+                            mGetAllSeedDistributionList.get(i).getFemaleBatchNo(), mGetAllSeedDistributionList.get(i).getMaleBatchNo(),
+                            mGetAllSeedDistributionList.get(i).getSeedProductionArea(),
+                            mGetAllSeedDistributionList.get(i).getFemaleParentSeedBatchId(),
+                            mGetAllSeedDistributionList.get(i).getMaleParentSeedBatchId(),
+                            mGetAllSeedDistributionList.get(i).getParentSeedReceiptId(),
+                            mGetAllSeedDistributionList.get(i).getParentSeedReceiptType(),
+                            mGetAllSeedDistributionList.get(i).getProductionClusterId()
+                            );
+                    database.addAreaData(storeAreaModel);
+                }
+            } finally {
+              //  Log.e("temporary","finally mGetAllSeedDistributionList "+ mGetAllSeedDistributionList.size());
+                mGetAllSeedDistributionList.clear();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+         //   Log.e("temporary","StoreAreaAsyncTask result "+result);
+            downloadSeedBatchNoMasterData();
+            super.onPostExecute(result);
+        }
+    }
 }

@@ -1,7 +1,10 @@
 package mahyco.mipl.nxg.model;
 
 public class CategoryChildModel {
+   public CategoryChildModel()
+   {
 
+   }
     public CategoryChildModel(int CountryMasterId, int CategoryId, int ParentId, String KeyValue,
                               String KeyCode, String CreatedBy, String CreatedDt, String ModifiedBy, String ModifiedDt,
                               String CountryName, String CategoryName, String DisplayTitle) {

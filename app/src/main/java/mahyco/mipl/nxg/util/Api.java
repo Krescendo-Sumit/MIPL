@@ -20,6 +20,7 @@ import mahyco.mipl.nxg.model.SeasonModel;
 import mahyco.mipl.nxg.model.SeedBatchNoModel;
 import mahyco.mipl.nxg.model.SeedReceiptModel;
 import mahyco.mipl.nxg.model.SuccessModel;
+import mahyco.mipl.nxg.model.UserTypeModel;
 import mahyco.mipl.nxg.view.seeddistribution.ParentSeedDistributionParameter;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -45,6 +46,9 @@ public interface Api {
 
     @POST(Constants.GET_LOCATION)
     Call<List<CategoryChildModel>> getLocation(@Body JsonObject jsonObject);
+
+    @POST(Constants.GET_USER_TYPE)
+    Call<List<UserTypeModel>> getUserType(@Body JsonObject jsonObject);
 
     @POST(Constants.GET_GROWER)
     Call<List<DownloadGrowerModel>> getGrower(@Body JsonObject jsonObject);

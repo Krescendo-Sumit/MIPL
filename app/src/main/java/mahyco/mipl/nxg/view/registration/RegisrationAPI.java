@@ -11,6 +11,7 @@ import java.util.List;
 
 import mahyco.mipl.nxg.model.CategoryChildModel;
 import mahyco.mipl.nxg.model.CategoryModel;
+import mahyco.mipl.nxg.model.UserTypeModel;
 import mahyco.mipl.nxg.util.RetrofitClient;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -142,6 +143,45 @@ public class RegisrationAPI {
 
                 @Override
                 public void onFailure(Call<List<CategoryChildModel>> call, Throwable t) {
+                    if (progressDialog.isShowing())
+                        progressDialog.dismiss();
+                    Log.e("Error is", t.getMessage());
+                }
+            });
+        } catch (Exception e) {
+
+        }
+    }
+
+    public void getUserType(JsonObject jsonObject) {
+        try {
+            if (!progressDialog.isShowing())
+                progressDialog.show();
+
+            Call<List<UserTypeModel>> call = null;
+            call = RetrofitClient.getInstance().getMyApi().getUserType(jsonObject);
+            call.enqueue(new Callback<List<UserTypeModel>>() {
+                @Override
+                public void onResponse(Call<List<UserTypeModel>> call, Response<List<UserTypeModel>> response) {
+
+                    if (progressDialog.isShowing())
+                        progressDialog.dismiss();
+                    //  Toast.makeText(CourseList.this, "Calling..", Toast.LENGTH_SHORT).show();
+
+                    if (response.body() != null) {
+                        List<UserTypeModel> result = response.body();
+                        try {
+                            resultOutput.onUserTypeListResponce(result);
+                        } catch (NullPointerException e) {
+                            Toast.makeText(context, "Error is " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        } catch (Exception e) {
+                            Toast.makeText(context, "Error is " + e.getMessage(), Toast.LENGTH_LONG).show();
+                        }
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<List<UserTypeModel>> call, Throwable t) {
                     if (progressDialog.isShowing())
                         progressDialog.dismiss();
                     Log.e("Error is", t.getMessage());

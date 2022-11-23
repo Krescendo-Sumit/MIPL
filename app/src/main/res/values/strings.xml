@@ -289,12 +289,13 @@
     </string-array>
 
     <string-array name="usertype">
-
-        <item>MDO</item>
-        <item>TBM</item>
-
-
+        <item>Select</item>
+        <item>Country Lead</item>
+        <item>Seed Production Lead</item>
+        <item>Seed Inspector</item>
+        <item>Field Officer</item>
     </string-array>
+
     <string-array name="filter_options">
         <item>Select Filter Option</item>
         <item>Village Wise</item>

@@ -64,7 +64,7 @@ public class ActivityUpload extends BaseActivity implements View.OnClickListener
         setTitle("Data Upload");
 
         mContext = this;
-
+        Toast.makeText(mContext, "HI", Toast.LENGTH_SHORT).show();
         registrationAPI = new GrowerRegistrationAPI(mContext, this);
         mGrowerRegistrationBtn = findViewById(R.id.grower_registration_upload);
         mGrowerRegistrationBtn.setOnClickListener(this);
@@ -350,6 +350,7 @@ public class ActivityUpload extends BaseActivity implements View.OnClickListener
                     jsonObject.addProperty("UploadPhoto", /*mGrowerList.get(mIndex).getUploadPhoto()*/mGrowerPath);
                     jsonObject.addProperty("UserType", mGrowerList.get(mIndexForGrowerList).getUserType());
                     jsonObject.addProperty("UniqueId", mGrowerList.get(mIndexForGrowerList).getUniqueId());
+                    jsonObject.addProperty("Addr", mGrowerList.get(mIndexForGrowerList).getAddr());
                 } else {
                     jsonObject.addProperty("CountryId", mOrganizerList.get(mIndexForOrganizerList).getCountryId());
                     jsonObject.addProperty("CountryMasterId", mOrganizerList.get(mIndexForOrganizerList).getCountryMasterId());
@@ -368,7 +369,10 @@ public class ActivityUpload extends BaseActivity implements View.OnClickListener
                     jsonObject.addProperty("UploadPhoto", /*mOrganizerList.get(mIndex).getUploadPhoto()*/mGrowerPath);
                     jsonObject.addProperty("UserType", mOrganizerList.get(mIndexForOrganizerList).getUserType());
                     jsonObject.addProperty("UniqueId", mOrganizerList.get(mIndexForOrganizerList).getUniqueId());
+                    jsonObject.addProperty("Addr", mOrganizerList.get(mIndexForGrowerList).getAddr());
+
                 }
+                Toast.makeText(mContext, "Hi This is called.", Toast.LENGTH_SHORT).show();
                 registrationAPI.createGrower(jsonObject);
             }
             super.onPostExecute(unused);

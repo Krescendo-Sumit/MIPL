@@ -95,6 +95,10 @@ public class Login extends AppCompatActivity implements LoginAPIListener {
                 Toast.makeText(this, "Please select country", Toast.LENGTH_SHORT).show();
                 cnt++;
             }
+            if(countrycode==0)
+            {
+                Toast.makeText(context, "Please select country.", Toast.LENGTH_SHORT).show();
+            }
             if (str_usercode.isEmpty()) {
                 et_usercode.setError("Please Enter User Code");
                 cnt++;
@@ -180,6 +184,11 @@ public class Login extends AppCompatActivity implements LoginAPIListener {
     @Override
     public void onCountryListResponce(List result) {
         try {
+            CategoryChildModel categoryChildModel = new CategoryChildModel();
+            categoryChildModel.setCountryMasterId(0);
+            categoryChildModel.setCountryName("Select Country");
+            categoryChildModel.setKeyValue("Select Country");
+            result.add(0, categoryChildModel);
             adapter = new ArrayAdapter(context, android.R.layout.simple_list_item_1, result);
             country_drop_down.setAdapter(adapter);
             country_drop_down.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {

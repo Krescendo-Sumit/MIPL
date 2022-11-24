@@ -83,7 +83,8 @@ public class NewGrowerRegistration extends BaseActivity implements Listener, Vie
     EditText et_landmark, et_fullname, /*et_gender,*/ /*et_dob,*/
             et_mobile, et_uniqcode /*et_regdate,*/
             /*,et_satffname*/;
-    String str_et_landmark, str_et_fullname, str_et_gender, str_et_dob, str_et_mobile, str_et_uniqcode, str_et_regdate, str_et_satffname;
+            EditText et_address_edittext;
+    String str_et_landmark, str_et_fullname, str_et_gender, str_et_dob, str_et_mobile, str_et_uniqcode, str_et_regdate, str_et_satffname,str_et_address;
     Button grower_registration_submit_btn, scan_qr_code_btn;
     CircleImageView iv_dp;
     ImageView imageView_front, imageView_back;
@@ -216,6 +217,7 @@ public class NewGrowerRegistration extends BaseActivity implements Listener, Vie
             mSpinnerHeadingTextView = new int[]{R.id.textview1, R.id.textview2, R.id.textview3, R.id.textview4, R.id.textview5, R.id.textview6, R.id.textview7, R.id.textview8, R.id.textview9, R.id.textview10};
 
             et_landmark = (EditText) findViewById(R.id.landmark_edittext);
+            et_address_edittext = (EditText) findViewById(R.id.address_edittext);
             et_fullname = (EditText) findViewById(R.id.farmer_name_edittext);
             // et_gender = (EditText) findViewById(R.id.gender_edittext);
             et_dob = findViewById(R.id.date_of_birth_textview);
@@ -1401,6 +1403,9 @@ public class NewGrowerRegistration extends BaseActivity implements Listener, Vie
         } else if (TextUtils.isEmpty(et_landmark.getText().toString())) {
             showToast(getString(R.string.Please_enter_landmark));
             // return false;
+        }else if (TextUtils.isEmpty(et_address_edittext.getText().toString())) {
+            showToast(getString(R.string.Please_enter_address));
+            // return false;
         } else if (TextUtils.isEmpty(et_fullname.getText().toString())) {
             if (str_Lable.equalsIgnoreCase("Grower")) {
                 showToast(getString(R.string.Please_enter_farmer_name));
@@ -1555,6 +1560,7 @@ public class NewGrowerRegistration extends BaseActivity implements Listener, Vie
         try {
             str_et_landmark = et_landmark.getText().toString();
             str_et_fullname = et_fullname.getText().toString();
+            str_et_address = et_address_edittext.getText().toString();
 
             if (mMaleRadioButton.isChecked()) {
                 str_et_gender = mMaleRadioButton.getText().toString();
@@ -1590,6 +1596,7 @@ public class NewGrowerRegistration extends BaseActivity implements Listener, Vie
             growerModel.setFrontImageUpload(0);
             growerModel.setBackImageUpload(0);
             growerModel.setStaffNameAndId(str_et_satffname);
+            growerModel.setAddr(str_et_address);
             growerModel.setCreatedBy(Preferences.get(mContext, Preferences.USER_NAME));//
 
             new AddRegistrationAsyncTask().execute();

@@ -27,6 +27,16 @@ public class DownloadGrowerModel {
     private String UserName;
     private String UserCode;
 
+    public String getAddr() {
+        return Addr;
+    }
+
+    public void setAddr(String addr) {
+        Addr = addr;
+    }
+
+    private String Addr;
+
 
     public DownloadGrowerModel() {
     }

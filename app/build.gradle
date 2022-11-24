@@ -6,7 +6,7 @@ android {
     compileSdkVersion 31
     buildToolsVersion "30.0.3"
     defaultConfig {
-        applicationId "mahyco.iqc.nxg"
+        applicationId "mahyco.mipl.nxg"
         minSdkVersion 21
         targetSdkVersion 31
         versionCode 1

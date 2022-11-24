@@ -7,23 +7,24 @@
 
     <ImageView
         android:layout_width="match_parent"
-        android:layout_height="300dp"
-        android:src="@drawable/bottom"
+        android:layout_height="250dp"
         android:scaleType="fitXY"
+        android:src="@drawable/bottom"
         app:layout_constraintBottom_toBottomOf="parent" />
+
 
     <ImageView
         android:id="@+id/logo_imageview"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="200dp"
+        android:background="@drawable/dropdown_shape"
         android:src="@drawable/mipl_final_logo"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias=".00" />
-
+        app:layout_constraintVertical_bias="0.0" />
 
     <ImageView
         android:id="@+id/app_name_imageview"

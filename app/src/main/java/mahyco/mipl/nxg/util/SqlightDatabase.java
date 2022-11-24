@@ -29,7 +29,7 @@ import mahyco.mipl.nxg.model.StoreAreaModel;
 public class SqlightDatabase extends SQLiteOpenHelper {
 
     final static String DBName = "mipl";
-    final static int version = 8;
+    final static int version = 9;
     long count = 0;
     final String tbl_categorymaster = "tbl_categorymaster";
     final String tbl_locationmaster = "tbl_locationmaster";
@@ -144,7 +144,8 @@ public class SqlightDatabase extends SQLiteOpenHelper {
                 "    UniqueId text,\n" +
                 "    GrowerImageUpload INTEGER,\n" +
                 "    FrontImageUpload INTEGER,\n" +
-                "    BackImageUpload INTEGER\n" +
+                "    BackImageUpload INTEGER,\n" +
+                "    Addr TEXT\n" +
                 ")";
 
         db.execSQL(createRegistration);
@@ -497,6 +498,7 @@ public class SqlightDatabase extends SQLiteOpenHelper {
                     "CountryMasterId," +
                     "FarmerPhoto," +
                     "Landmark," +
+                    "Addr," +
                     "GrowerName," +
                     "Gender," +
                     "DateOfBirth," +
@@ -519,6 +521,7 @@ public class SqlightDatabase extends SQLiteOpenHelper {
                     "'" + growerModel.getCountryMasterId() + "'," +
                     "'" + growerModel.getUploadPhoto() + "'," +
                     "'" + growerModel.getLandMark() + "'," +
+                    "'" + growerModel.getAddr() + "'," +
                     "'" + growerModel.getFullName() + "'," +
                     "'" + growerModel.getGender() + "'," +
                     "'" + growerModel.getDOB() + "'," +
@@ -653,7 +656,8 @@ public class SqlightDatabase extends SQLiteOpenHelper {
                             cursorCourses.getInt(0),
                             cursorCourses.getInt(19),
                             cursorCourses.getInt(20),
-                            cursorCourses.getInt(21)
+                            cursorCourses.getInt(21),
+                            cursorCourses.getString(22)
                     ));
                 } while (cursorCourses.moveToNext());
             }
@@ -1611,7 +1615,7 @@ public class SqlightDatabase extends SQLiteOpenHelper {
                     "'" + categoryModel.getCountryMasterId() + "'," +
                     "'" + categoryModel.getUniqueId() + "'," +
                     "'" + categoryModel.getUserType() + "'," +
-                    "'" + categoryModel.getLandMark() + "'," +
+                    "'" + categoryModel.getAddr()+","+categoryModel.getLandMark() + "'," +
                     "'" + categoryModel.getFullName() + "'," +
                     "'" + categoryModel.getDOB() + "'," +
                     "'" + categoryModel.getGender() + "'," +

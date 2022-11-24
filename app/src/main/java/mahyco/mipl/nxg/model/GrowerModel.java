@@ -23,7 +23,7 @@ public class GrowerModel {
                        int isSync, String createdBy, String userType, String idProofBackCopy,
                        int loginId,String uniqueId, int tempId,int growerImageUpload,
                                int frontImageUpload,
-                               int backImageUpload) {
+                               int backImageUpload,String Addr1) {
         GrowerImageUpload = growerImageUpload;
         FrontImageUpload = frontImageUpload;
         BackImageUpload = backImageUpload;
@@ -46,6 +46,8 @@ public class GrowerModel {
         LoginId = loginId;
         UniqueId = uniqueId;
         TempId = tempId;
+        Addr=Addr1;
+
     }
 
     public int getGrowerImageUpload() {
@@ -235,4 +237,14 @@ public class GrowerModel {
     String UploadPhoto;//": "string",
     String RegDt;//": "2022-10-11T04:44:57.051Z",
     String CreatedBy;//": "string"
+
+    public String getAddr() {
+        return Addr;
+    }
+
+    public void setAddr(String addr) {
+        Addr = addr;
+    }
+
+    String Addr;
 }

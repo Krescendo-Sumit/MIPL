@@ -279,6 +279,7 @@
     <string name="download_crop_type_master">Download Crop Type Master</string>
     <string name="download_parent_seed_receipt">Download Parent Seed Receipt</string>
     <string name="download_parent_seed_distribution">Download Parent Seed Distribution</string>
+    <string name="Please_enter_address" >Please enter address.</string>
 
     <string-array name="country_array">
         <item>Select Country</item>

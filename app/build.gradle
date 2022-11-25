@@ -51,4 +51,10 @@ dependencies {
     implementation 'de.hdodenhof:circleimageview:3.1.0'
     implementation 'com.github.MasayukiSuda:Mp4Composer-android:v0.4.1'
     implementation 'com.github.yuriy-budiyev:code-scanner:2.3.2'
+
+    implementation platform('com.google.firebase:firebase-bom:31.1.0')
+    implementation 'com.google.firebase:firebase-analytics'
+    implementation 'com.google.firebase:firebase-crashlytics'
 }
+apply plugin:  'com.google.gms.google-services'
+apply plugin:  'com.google.firebase.crashlytics'

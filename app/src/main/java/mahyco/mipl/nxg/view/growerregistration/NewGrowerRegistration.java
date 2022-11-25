@@ -53,6 +53,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -83,8 +85,8 @@ public class NewGrowerRegistration extends BaseActivity implements Listener, Vie
     EditText et_landmark, et_fullname, /*et_gender,*/ /*et_dob,*/
             et_mobile, et_uniqcode /*et_regdate,*/
             /*,et_satffname*/;
-            EditText et_address_edittext;
-    String str_et_landmark, str_et_fullname, str_et_gender, str_et_dob, str_et_mobile, str_et_uniqcode, str_et_regdate, str_et_satffname,str_et_address;
+    EditText et_address_edittext;
+    String str_et_landmark, str_et_fullname, str_et_gender, str_et_dob, str_et_mobile, str_et_uniqcode, str_et_regdate, str_et_satffname, str_et_address;
     Button grower_registration_submit_btn, scan_qr_code_btn;
     CircleImageView iv_dp;
     ImageView imageView_front, imageView_back;
@@ -138,6 +140,9 @@ public class NewGrowerRegistration extends BaseActivity implements Listener, Vie
     private RadioButton mFemaleRadioButton;
 
     private androidx.appcompat.widget.Toolbar toolbar;
+    String str_address = "";
+    int total_active_spinners = 0;
+
 
     @Override
     protected int getLayout() {
@@ -159,7 +164,7 @@ public class NewGrowerRegistration extends BaseActivity implements Listener, Vie
             //setTitle("New " + str_Lable + " Registration");
 
             toolbar = findViewById(R.id.toolbar);
-            if(str_Lable.equalsIgnoreCase("Grower")) {
+            if (str_Lable.equalsIgnoreCase("Grower")) {
                 toolbar.setTitle("New " + str_Lable + " Registration");
             } else {
                 toolbar.setTitle("New Coordinator Registration");
@@ -229,7 +234,7 @@ public class NewGrowerRegistration extends BaseActivity implements Listener, Vie
             et_satffname = findViewById(R.id.staff_name_and_id_textview);
             txt_name = (TextView) findViewById(R.id.txt_name);
             txt_registration_country = (TextView) findViewById(R.id.registration_country_textview);
-            if(str_Lable.equalsIgnoreCase("Grower")) {
+            if (str_Lable.equalsIgnoreCase("Grower")) {
                 txt_name.setText(str_Lable + " Full Name :");
             } else {
                 txt_name.setText("Coordinator Full Name :");
@@ -287,7 +292,7 @@ public class NewGrowerRegistration extends BaseActivity implements Listener, Vie
                     String myFormat = "dd-MM-yyyy";
                     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault());
                     dob = sdf.format(mCalendar.getTime());
-                  //  Log.e("temporary", "dob " + dob);
+                    //  Log.e("temporary", "dob " + dob);
                     SimpleDateFormat dateFormat = new SimpleDateFormat(myFormat, Locale.getDefault());
                     et_dob.setText(dateFormat.format(mCalendar.getTime()));
                 };
@@ -853,7 +858,8 @@ public class NewGrowerRegistration extends BaseActivity implements Listener, Vie
         protected void onPostExecute(ArrayList<CategoryModel> result) {
 
             if (result != null && result.size() > 0) {
-
+                total_active_spinners = result.size();
+                et_address_edittext.setText("" + total_active_spinners);
                 for (int i = 0; i < result.size(); i++) {
 //                    SearchableSpinner searchableSpinner = findViewById(mSpinnerArray[i]);
                     mSpinnerArray[i].setVisibility(View.VISIBLE);
@@ -902,6 +908,11 @@ public class NewGrowerRegistration extends BaseActivity implements Listener, Vie
     }
 
     private void callLocationAdapter(ArrayList<CategoryChildModel> result) {
+        CategoryChildModel categoryChildModel = new CategoryChildModel();
+        categoryChildModel.setKeyValue("Select");
+        categoryChildModel.setCountryMasterId(0);
+        categoryChildModel.setCategoryId(0);
+        result.add(0, categoryChildModel);
         switch (mSpinnerPosition) {
             case 1: {
                 mSpinner1List = result;
@@ -923,8 +934,10 @@ public class NewGrowerRegistration extends BaseActivity implements Listener, Vie
                     public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                         if (mSpinner2List != null && mSpinner2List.size() > 0) {
                             mSpinnerPosition = 3;
+
                             mCountryMasterIdAsPerSelection = mSpinner2List.get(i).getCountryMasterId();
                             new GetLocationMasterAsyncTask().execute();
+
                         }
                     }
 
@@ -1394,6 +1407,7 @@ public class NewGrowerRegistration extends BaseActivity implements Listener, Vie
         }
     }*/
     private /*boolean*/void validation() {
+        et_address_edittext.setText(getFullAddress());
         if (mGrowerPhotoFile == null) {
             showToast(getString(R.string.please_grower_photo));
             //  return false;
@@ -1403,7 +1417,7 @@ public class NewGrowerRegistration extends BaseActivity implements Listener, Vie
         } else if (TextUtils.isEmpty(et_landmark.getText().toString())) {
             showToast(getString(R.string.Please_enter_landmark));
             // return false;
-        }else if (TextUtils.isEmpty(et_address_edittext.getText().toString())) {
+        } else if (TextUtils.isEmpty(et_address_edittext.getText().toString())) {
             showToast(getString(R.string.Please_enter_address));
             // return false;
         } else if (TextUtils.isEmpty(et_fullname.getText().toString())) {
@@ -1628,5 +1642,72 @@ public class NewGrowerRegistration extends BaseActivity implements Listener, Vie
         hideKeyboard(mContext);
         dismissNoInternetDialog();
         super.onDestroy();
+    }
+
+
+    String getFullAddress() {
+        ArrayList<String> addressAL = new ArrayList<>();
+        str_address = "";
+        for (int i = 0; i < total_active_spinners; i++) {
+            if (i == 0) {
+                if(mSearchableSpinner1.getSelectedItem() != null)
+                if (mSearchableSpinner1 != null && !mSearchableSpinner1.getSelectedItem().toString().trim().equals("Select"))
+                    addressAL.add(mSearchableSpinner1.getSelectedItem().toString().trim());
+                //   str_address+=mSearchableSpinner1.getSelectedItem().toString().trim()+",";
+            } else if (i == 1) {
+                if(mSearchableSpinner2.getSelectedItem() != null)
+                if (mSearchableSpinner2 != null && !mSearchableSpinner2.getSelectedItem().toString().trim().equals("Select"))
+                    addressAL.add(mSearchableSpinner2.getSelectedItem().toString().trim());
+                //       str_address+=mSearchableSpinner2.getSelectedItem().toString().trim()+",";
+            } else if (i == 2) {
+                if(mSearchableSpinner3.getSelectedItem() != null)
+                if (mSearchableSpinner3 != null && !mSearchableSpinner3.getSelectedItem().toString().trim().equals("Select"))
+                    addressAL.add(mSearchableSpinner3.getSelectedItem().toString().trim());
+                //         str_address+=mSearchableSpinner3.getSelectedItem().toString().trim()+",";
+            } else if (i == 3) {
+                if(mSearchableSpinner4.getSelectedItem() != null)
+                if (mSearchableSpinner4 != null && !mSearchableSpinner4.getSelectedItem().toString().trim().equals("Select"))
+                    addressAL.add(mSearchableSpinner4.getSelectedItem().toString().trim());
+                //           str_address+=mSearchableSpinner4.getSelectedItem().toString().trim()+",";
+            } else if (i == 4) {
+
+                if(mSearchableSpinner5.getSelectedItem() != null)
+                if (mSearchableSpinner5 != null && !mSearchableSpinner5.getSelectedItem().toString().trim().equals("Select"))
+                    addressAL.add(mSearchableSpinner5.getSelectedItem().toString().trim());
+                //str_address+=mSearchableSpinner5.getSelectedItem().toString().trim()+",";
+            } else if (i == 5) {
+                if(mSearchableSpinner6.getSelectedItem() != null)
+                if (mSearchableSpinner6 != null && !mSearchableSpinner6.getSelectedItem().toString().trim().equals("Select"))
+                    addressAL.add(mSearchableSpinner6.getSelectedItem().toString().trim());
+                //str_address+=mSearchableSpinner6.getSelectedItem().toString().trim()+",";
+            } else if (i == 6) {
+                if(mSearchableSpinner7.getSelectedItem() != null)
+                if (mSearchableSpinner7 != null && !mSearchableSpinner7.getSelectedItem().toString().trim().equals("Select"))
+                    addressAL.add(mSearchableSpinner7.getSelectedItem().toString().trim());
+                //str_address+=mSearchableSpinner7.getSelectedItem().toString().trim()+",";
+            } else if (i == 7) {
+                if(mSearchableSpinner8.getSelectedItem() != null)
+                if (mSearchableSpinner8 != null && !mSearchableSpinner8.getSelectedItem().toString().trim().equals("Select"))
+                    addressAL.add(mSearchableSpinner8.getSelectedItem().toString().trim());
+                //str_address+=mSearchableSpinner8.getSelectedItem().toString().trim()+",";
+            } else if (i == 8) {
+                if(mSearchableSpinner9.getSelectedItem() != null)
+                if (mSearchableSpinner9 != null && !mSearchableSpinner9.getSelectedItem().toString().trim().equals("Select"))
+                    addressAL.add(mSearchableSpinner9.getSelectedItem().toString().trim());
+                //str_address+=mSearchableSpinner9.getSelectedItem().toString().trim()+",";
+            } else if (i == 9) {
+                if(mSearchableSpinner10.getSelectedItem() != null)
+                if (mSearchableSpinner10 != null && !mSearchableSpinner10.getSelectedItem().toString().trim().equals("Select"))
+                    addressAL.add(mSearchableSpinner10.getSelectedItem().toString().trim());
+                //str_address+=mSearchableSpinner10.getSelectedItem().toString().trim()+",";
+            }
+        }
+        Collections.reverse(addressAL);
+        str_address = addressAL.toString();
+        str_address = str_address.replace("[", "");
+        str_address = str_address.replace("]", "");
+
+
+        return str_address;
     }
 }

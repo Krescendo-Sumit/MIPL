@@ -94,13 +94,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     public void init() {
+        TextView versionTextView = findViewById(R.id.textView8);
 
-         TextView versionTextView = findViewById(R.id.textView8);
          versionTextView.setText(getString(R.string.version_code, BuildConfig.VERSION_CODE));
         rc_viewiqcplant = findViewById(R.id.rc_viewiqcplant);
-        mManager = new LinearLayoutManager(context);
-        rc_viewiqcplant.setLayoutManager(mManager);
+        mManager = new LinearLayoutManager(context);rc_viewiqcplant.setLayoutManager(mManager);
         txtlbl = findViewById(R.id.txt_lbl);
+
 
         if (Preferences.get(context, Preferences.USER_NAME) != null)
             txtlbl.setText(Html.fromHtml("<b>Welcome - </b> <b style='color:#fc5a03;'>" + Preferences.get(context, Preferences.USER_NAME) + "</b>"));
